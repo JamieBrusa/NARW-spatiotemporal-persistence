@@ -21,4 +21,4 @@ stringer
 
 
 ### How to Use this Repository
-The data filtering and analysis code can be used to estimate the probability of detecting an individual of a particular species given an initial detection of the same species in the same geographic location for visual detection data of wildlife species. We provide code for data filtering and bootstrap resampling and for simulations (to test for out-of-sample predictive ability). The code is versitile to be adapted to data for other studies that might benefit from our presented protocol.
+The data filtering and analysis code can be used to estimate the probability of detecting an individual of a particular species given a recent previous detection of the same species in the same geographic location for visual detection data of wildlife species. We provide code for data filtering and bootstrap resampling and for simulations (to test for out-of-sample predictive ability). The code is versitile to be adapted to data for other studies that might benefit from our presented protocol.
