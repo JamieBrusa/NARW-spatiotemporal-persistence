@@ -4,7 +4,7 @@
 
 ##### Please contact the first author for questions about the code or data: Jamie Brusa (jlbwcc@gmail.com)
 
-DOI: Note, this work is in the preparation phase an not yet submitted for publication
+DOI: Note, this work is in the preparation phase an not yet submitted for publication (and this repo is currently set to private)
 _______________________________________________________________________________________
 
 ## Abstract
