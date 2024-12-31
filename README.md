@@ -14,8 +14,10 @@ Knowledge of where, when, and for how long rare species occur is essential for e
 
 ### Required Packages and Versions Used
 tidyverse
-sf
 here
+sf
+sp
+stringer
 
 
 ### How to Use this Repository
