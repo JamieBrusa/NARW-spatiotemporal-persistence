@@ -13,15 +13,15 @@ Knowledge of where, when, and for how long rare species occur is essential for e
 
 
 ### Required Packages and Versions Used
-####For data filtering and bootstrap resampling
+#### For data filtering and bootstrap resampling
 tidyverse
 here
 sf
 sp
 stringer
-####Additional package for testing for out-of-sample predictive ability
+#### Additional package for testing for out-of-sample predictive ability
 caret
-####Additional packages for modelling effort and detections
+#### Additional packages for modelling effort and detections
 raster
 rjags
 runjags
