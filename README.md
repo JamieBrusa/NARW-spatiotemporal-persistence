@@ -13,13 +13,24 @@ Knowledge of where, when, and for how long rare species occur is essential for e
 
 
 ### Required Packages and Versions Used
+####For data filtering and bootstrap resampling
 tidyverse
 here
 sf
 sp
 stringer
+####Additional package for testing for out-of-sample predictive ability
 caret
+####Additional packages for modelling effort and detections
+raster
+rjags
+runjags
+coda
+ggmcmc
+mcmcVIS
+arm
+loo
 
 
 ### How to Use this Repository
-The data filtering and analysis code can be used to estimate the probability of detecting an individual of a particular species given a recent previous detection of the same species in the same geographic location for visual detection data of wildlife species. We provide code for data filtering and bootstrap resampling and for simulations (to test for out-of-sample predictive ability). The code is versitile to be adapted to data for other studies that might benefit from our presented protocol.
+The data filtering and analysis code can be used to estimate the probability of detecting an individual of a particular species given a recent previous detection of the same species in the same geographic location for visual detection data of wildlife species. We provide code for data filtering and bootstrap resampling and for simulations (to test for out-of-sample predictive ability). Additionally, we also provide code described in Appendix 2 and Appendix 3 of the accompanying publication for modeling the relationship between survey effort and redetections as well as for incorporating prior information using a similar approach to our resampling protocol but using Bayes' Theorem. The code is versitile to be adapted to data for other studies that might benefit from our presented protocol.
