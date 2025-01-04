@@ -1,4 +1,4 @@
-## Analytical approaches for predicting fine-scale spatiotemporal persistence of rare species: an example with North Atlantic right whales   
+## Predicting fine-scale spatiotemporal persistence of rare species: an example with North Atlantic right whales   
 
 #### Jamie L. Brusa, Daniel W. Linden, Meghan P. Gahm, Eric M. Patterson, Caroline P. Good, Daniel E. Pendleton, Jason J. Roberts, Timothy V. N. Cole, Danielle M. Cholewiak  
 
