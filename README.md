@@ -4,7 +4,7 @@
 
 ##### Please contact the first author for questions about the code or data: Jamie Brusa (jlbwcc@gmail.com)
 
-DOI: Note, this work is in the preparation phase an not yet submitted for publication
+DOI: Note, this work is in the preparation phase an not yet submitted for publication (and this repo is currently set to private)
 _______________________________________________________________________________________
 
 ## Abstract
@@ -14,9 +14,12 @@ Knowledge of where, when, and for how long rare species occur is essential for e
 
 ### Required Packages and Versions Used
 tidyverse
-sf
 here
+sf
+sp
+stringer
+caret
 
 
 ### How to Use this Repository
-The data filtering and analysis code can be used to estimate the probability of detecting an individual of a particular species given an initial detection of the same species in the same geographic location for visual detection data of wildlife species. We provide code for data filtering and bootstrap resampling and for simulations (to test for out-of-sample predictive ability). The code is versitile to be adapted to data for other studies that might benefit from our presented protocol.
+The data filtering and analysis code can be used to estimate the probability of detecting an individual of a particular species given a recent previous detection of the same species in the same geographic location for visual detection data of wildlife species. We provide code for data filtering and bootstrap resampling and for simulations (to test for out-of-sample predictive ability). The code is versitile to be adapted to data for other studies that might benefit from our presented protocol.
