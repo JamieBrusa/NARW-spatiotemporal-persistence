@@ -1,6 +1,6 @@
 ## Predicting fine-scale spatiotemporal persistence of rare species: an example with North Atlantic right whales   
 
-#### Jamie L. Brusa, Daniel W. Linden, Meghan P. Gahm, Eric M. Patterson, Caroline P. Good, Daniel E. Pendleton, Jason J. Roberts, Timothy V. N. Cole, Danielle M. Cholewiak  
+#### Jamie L. Brusa, Daniel W. Linden, Meghan P. Gahm, Eric M. Patterson, Caroline P. Good, Daniel E. Pendleton, Jason J. Roberts, Timothy V. N. Cole, Hannah Blondin, Danielle M. Cholewiak  
 
 ##### Please contact the first author for questions about the code or data: Jamie Brusa (jlbwcc@gmail.com)
 
