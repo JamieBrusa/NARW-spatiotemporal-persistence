@@ -18,6 +18,7 @@ model.data <- read.csv('model_data.csv')
 #Center/scale covariates
 mean.prop <- mean(model.data$prop)
 prop2sd <- 2*sd(model.data$prop)
+model.data$cs.prop <- NA
 for(i in 1:length(model.data$prop)){
   model.data$cs.prop[i] <- (model.data$prop[i] - mean.prop)/prop2sd
 }
