@@ -33,6 +33,8 @@ for(i in unique(na.omit(strata.r$DetNum))){
   d <- as.numeric((jln - 7):(jln + 7))
   d <- case_when(d == 0 ~ 365, d == -1 ~ 364, d == -2 ~ 363, d == -3 ~ 362, d == -4 ~ 361, d == -5 ~ 360, 
                  d == -6 ~ 359, TRUE ~ d)
+  d <- case_when(d == 366 ~ 1, d == 367 ~ 2, d == 368 ~ 3, d == 369 ~ 4, d == 370 ~ 5, 
+                 d == 371 ~ 6, TRUE ~ d)
   jdq <- strata.detections.all[strata.detections.all$Julian %in% d,] %>%
     distinct(JDY, .keep_all = T)
   
