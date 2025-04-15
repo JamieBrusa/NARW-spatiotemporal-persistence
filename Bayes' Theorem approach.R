@@ -17,7 +17,7 @@ set.seed(123)
 BTsurvey.pts <- st_read('BTsurvey_pts.shp')
 
 
-BT.pts <- st_centroid(survey.pts)
+BT.pts <- st_centroid(BTsurvey.pts)
 BT.r <- st_buffer(BT.pts, 20898)
 BT.detections.all <- BT.r %>% filter(Detected == 1)
 BT.detections.all$DetNum <- 1:nrow(BT.detections.all)
