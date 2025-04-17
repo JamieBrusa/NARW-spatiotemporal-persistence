@@ -36,7 +36,7 @@ for(i in unique(na.omit(strata.r$DetNum))){
   d <- case_when(d == 366 ~ 1, d == 367 ~ 2, d == 368 ~ 3, d == 369 ~ 4, d == 370 ~ 5, 
                  d == 371 ~ 6, TRUE ~ d)
   jdq <- strata.detections.all[strata.detections.all$Julian %in% d,] %>%
-    distinct(JDY, .keep_all = T)
+    distinct(DetNum, .keep_all = T)
   
   q <- jdq[st_intersects(jdq, strata.detections[strata.detections$DetNum == i,], sparse = F), ]
   
