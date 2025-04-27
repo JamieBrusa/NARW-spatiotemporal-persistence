@@ -62,7 +62,7 @@ for(i in unique(na.omit(strata.r$DetNum))){
       pre_redetectsr <- pre_q2r %>% group_by(JDY) %>% summarise(redetectsr = max(Detected)) 
       redetectsr <- sum(pre_redetectsr$redetectsr)}
     
-
+    
     pre_q2.l[[r]]$resurveysr <- resurveysr
     pre_q2.l[[r]]$redetectsr <- redetectsr
     pre_q2.l[[r]]$JDY <- wks
@@ -92,34 +92,54 @@ stop <- Sys.time()
 
 samps.df <- data.table::rbindlist(samps)
 
-#Summarize each first detection buffer as having North Atlantic right whale(s) redetection in the 7 days following the first 
-#detection (1) or not (0) (instead of summarized as a total)
+#Add a line for each resurvey and include each redetection (instead of summarized as a total)
+#This alternative method takes into account variation in the number of resurveys across detection buffers
 resurvs <- samps.df %>% filter(resurveys > 0)
+resurvs$ID <- 1:nrow(resurvs)
 
-colnames(resurvs)[4] <- "JDY_FD" #This field is the JDY from the first detection
+resurvs_new <- as.data.frame(matrix(data = NA, nrow = 0, ncol = length(resurvs), 
+                                    dimnames = list(NULL,names(resurvs))))
+for(r in 1:nrow(resurvs)){
+  n <- resurvs$resurveys[r]
+  n2 <- resurvs$redetects[r]
+  newrow <- resurvs[r,]
+  newrow$redetects <- 0
+  newrow2 <- resurvs[r,]
+  newrow2$redetects <- n2
+  if(n2 < 1){newrows <- as.data.frame(lapply(newrow, rep, n-1))
+  }else{
+    newrows <- as.data.frame(lapply(newrow, rep, n-n2))
+  }
+  if(n2 < 1){newrows2 <- NULL
+  }else{newrows2 <- as.data.frame(lapply(newrow2, rep, n2-1))
+  }
+  resurvs_new <- rbind(resurvs_new, resurvs[r,], newrows, newrows2)
+}
+
+resurvs_new$redetects <- ifelse(resurvs_new$redetects > 0, 1, 0)
+
+colnames(resurvs_new)[4] <- "JDY_FD" #This field is the JDY from the first detection
 
 
 #Need to renumber DetNum to eliminate any gaps for the resampling for loop
-detnum <- unique(resurvs$DetNum)
+detnum <- unique(resurvs_new$DetNum)
 dumb <- data.frame(detnum = detnum,
                    numbers = 1:length(detnum))
 
-resurvs$detnum <- 0
+resurvs_new$detnum <- 0
 for(i in dumb$detnum){
-  resurvs$detnum[resurvs$DetNum == i] <- match(i, dumb$detnum)
+  resurvs_new$detnum[resurvs_new$DetNum == i] <- match(i, dumb$detnum)
 }
-
-resurvs$redetects <- ifelse(resurvs$redetects > 0, 1, 0)
 
 
 ##Resampling process##
 
 iterations <- 10000
-boot.out <- matrix(NA,nrow = iterations,ncol=length(unique(resurvs$detnum)))
-for(s in unique(resurvs$detnum)){
+boot.out <- matrix(NA,nrow = iterations,ncol=length(unique(resurvs_new$detnum)))
+for(s in unique(resurvs_new$detnum)){
   for(i in 1:iterations){
-    rows <- which(resurvs$detnum == s)
-    boot.samp <- sample(resurvs$redetects[rows], size = length(rows), replace = TRUE)
+    rows <- which(resurvs_new$detnum == s)
+    boot.samp <- sample(resurvs_new$redetects[rows], size = length(rows), replace = TRUE)
     boot.out[i,s] <- mean(boot.samp > 0) 
   }
 }
@@ -131,11 +151,11 @@ boot.lcl <- apply(boot.out,2,function(x) quantile(x,probs=c(0.025)))
 boot.ucl <- apply(boot.out,2,function(x) quantile(x,probs=c(0.975)))
 
 #Put output into a dataframe
-DetNum <- unique(resurvs$DetNum)
+DetNum <- unique(resurvs_new$DetNum)
 boot.out.df <- as.data.frame(cbind(DetNum, boot.means, boot.lcl, boot.ucl))
 
 ##Bring in additional information##
-FirstDets <- resurvs[,3:5]
+FirstDets <- resurvs_new[,3:5]
 FirstDets <- dplyr::distinct(FirstDets, .keep_all = TRUE)
 
 boot.out.df <- left_join(FirstDets, boot.out.df, by = "DetNum")

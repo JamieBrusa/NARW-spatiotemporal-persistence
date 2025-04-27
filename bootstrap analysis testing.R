@@ -45,7 +45,7 @@ detnum <- boot.train$detnum
 #bootstrap resampling approach using all years of data.
 
 #Run bootstrap resampling
-iterations <- 1000
+iterations <- 10000
 train.out <- matrix(NA, nrow = iterations, ncol=length(unique(boot.train$detnum)))
 for(s in unique(boot.train$detnum)){
   for(i in 1:iterations){
@@ -59,7 +59,7 @@ train.means <- apply(train.out,2,mean)
 
 trnm.fac <- as.factor(ifelse(train.means < 0.5, 0, 1))
 
-iterations <- 1000
+iterations <- 10000
 test.out <- matrix(NA, nrow = iterations, ncol=length(unique(boot.test$detnum)))
 for(s in unique(boot.test$detnum)){
   for(i in 1:iterations){
@@ -71,6 +71,8 @@ for(s in unique(boot.test$detnum)){
 
 test.means <- apply(test.out,2,mean)
 tstm.fac <- as.factor(ifelse(test.means < 0.5, 0, 1))
+
+CM.boot <- confusionMatrix(trnm.fac, tstm.fac, positive = "1")
 
 
 CM.bootAllYears <- confusionMatrix(trnm.fac, tstm.fac, positive = "1")
@@ -89,7 +91,7 @@ boot.AllYears.df$YearRange <- "Combined"
 #both training and test sets.
 
 #Set the filter one at a time to remove each year for an independent run
-boot.train.set <- createDataPartition(resurveys$redetects, p = 2/3, list = FALSE)
+boot.train.set <- createDataPartition(y = resurveys$redetects, p = 2/3, list = FALSE)
 
 boot.train.all <- resurveys[boot.train.set, ]
 boot.test.all <- resurveys[-boot.train.set, ]
@@ -107,7 +109,7 @@ for(i in 2010:2020){
   #Match up spatiotemporal sampling units
   boot.train <- boot.train[boot.train$DetNum %in% boot.test$DetNum,]
   boot.test <- boot.test[boot.test$DetNum %in% boot.train$DetNum,]
-  
+
   #Need to renumber the detnum for the for loop in the resampling approach to function
   detnum <- unique(boot.train$DetNum)
   dumb <- data.frame(detnum = detnum, numbers = 1:length(detnum))
@@ -129,7 +131,7 @@ for(i in 2010:2020){
   
   
   #Run bootstrap resampling
-  iterations <- 1000
+  iterations <- 10000
   train.out <- matrix(NA, nrow = iterations, ncol=length(unique(boot.train$detnum)))
   for(s in unique(boot.train$detnum)){
     for(t in 1:iterations){
@@ -143,7 +145,7 @@ for(i in 2010:2020){
   
   trnm.fac <- as.factor(ifelse(train.means < 0.5, 0, 1))
   
-  iterations2 <- 1000
+  iterations2 <- 10000
   test.out <- matrix(NA, nrow = iterations2, ncol=length(unique(boot.test$detnum)))
   for(s2 in unique(boot.test$detnum)){
     for(t2 in 1:iterations2){
@@ -184,10 +186,10 @@ boot.Years <- rbind(boot.AllYears.df, CM.boot.df)
 #of redetects as 0 or 1, prior to extracting specific years. The training and test sets are again filtered to retain
 #only spatiotemporal sampling units present in both training and test sets.
 
-boot.train.set <- createDataPartition(resurvs_new$redetects, p = 2/3, list = FALSE) 
+boot.train.set <- createDataPartition(resurveys$redetects, p = 2/3, list = FALSE) 
 
-boot.train.all <- resurvs_new[boot.train.set, ]
-boot.test.all <- resurvs_new[-boot.train.set, ]
+boot.train.all <- resurveys[boot.train.set, ]
+boot.test.all <- resurveys[-boot.train.set, ]
 
 #Match up spatiotemporal sampling units
 boot.train.all <- boot.train.all[boot.train.all$DetNum %in% boot.test.all$DetNum,]
@@ -196,9 +198,13 @@ boot.test.all <- boot.test.all[boot.test.all$DetNum %in% boot.train.all$DetNum,]
 #Iterate across years
 #For last3 and last5, change years to limit/extend to y-3 or y-5 (and adjust 2014:2020 to 2015:2020)
 CM.5yrsboot <- list()
-for(y in 2014:2020){
-  boot.train <- boot.train.all %>% filter(Year == (y-1) | Year == (y-2) | Year == (y-3) | 
-                                            Year == (y-4))
+# for(y in 2014:2020){ #for CM.3yrsboot and CM.4yrsboot
+  for(y in 2015:2020){ #for CM.5yrsboot
+  # boot.train <- boot.train.all %>% filter(Year == (y-1) | Year == (y-2) | Year == (y-3)) #use for last CM.3yrsboot
+  # boot.train <- boot.train.all %>% filter(Year == (y-1) | Year == (y-2) | Year == (y-3) | 
+  #                                           Year == (y-4)) #use for last CM.4yrsboot
+  boot.train <- boot.train.all %>% filter(Year == (y-1) | Year == (y-2) | Year == (y-3) |
+                                            Year == (y-4) | Year == (y-5) ) #use for last CM.5yrsboot
   boot.test <- boot.test.all %>% filter(Year == y)
   
   #Match up spatiotemporal sampling units
@@ -226,7 +232,7 @@ for(y in 2014:2020){
   
   
   #Run bootstrap resampling
-  iterations <- 1000
+  iterations <- 10000
   train.out <- matrix(NA, nrow = iterations, ncol=length(unique(boot.train$detnum)))
   for(s in unique(boot.train$detnum)){
     for(t in 1:iterations){
@@ -240,7 +246,7 @@ for(y in 2014:2020){
   
   trnm.fac <- as.factor(ifelse(train.means < 0.5, 0, 1))
   
-  iterations2 <- 1000
+  iterations2 <- 10000
   test.out <- matrix(NA, nrow = iterations2, ncol=length(unique(boot.test$detnum)))
   for(s2 in unique(boot.test$detnum)){
     for(t2 in 1:iterations2){
@@ -255,32 +261,30 @@ for(y in 2014:2020){
   
   
   
-  CM.4yrsboot[[y]] <- confusionMatrix(trnm.fac, tstm.fac, positive = "1")
+  CM.5yrsboot[[y]] <- confusionMatrix(trnm.fac, tstm.fac, positive = "1")
   
 }
 
-CM.4yrsboot.df <-
+CM.5yrsboot.df <-
   as.data.frame(
     do.call(
       rbind,
-      lapply(CM.4yrsboot,
+      lapply(CM.5yrsboot,
              FUN = "[[",
              "overall"
       )
     )
   )
 
-CM.4yrsboot.df$Year <- as.character(2014:2020)
-CM.4yrsboot.df$YearRange <- "Last4"
-boot.Years <- rbind(boot.Years, CM.4yrsboot.df)
+CM.5yrsboot.df$Year <- as.character(2014:2020) #2015:2020 for Last5 years
+CM.5yrsboot.df$YearRange <- "Last5"
+boot.Years <- rbind(boot.Years, CM.5yrsboot.df)
 boot.Years[1, 8] <- "Combined"
-print(boot.Years)
 
 
-#To try to pinpoint the variation, we looked at filtering different strata (geographic regions) and seasons.
+#To try to pinpoint the regional variation, we looked at estimating accuracy for different strata (geographic regions).
 
-filtered.df <- resurvs_new %>% filter(Stratum == 7 | Stratum == 9)# | Stratum == 5)
-#filtered.df <- filtered.df %>% filter(Julian < 305 & Julian > 59)
+filtered.df <- resurveys %>% filter(Stratum == "Nearshore SNE" | Stratum == "Midshore SNE") #Change for different regions
 
 boot.train.set <- createDataPartition(filtered.df$redetects, p = 2/3, list = FALSE)
 
@@ -313,7 +317,7 @@ for(i in dumb2$detnum){
 detnum <- boot.train$detnum
 
 #Run bootstrap resampling
-iterations <- 1000
+iterations <- 10000
 train.out <- matrix(NA, nrow = iterations, ncol=length(unique(boot.train$detnum)))
 for(s in unique(boot.train$detnum)){
   for(i in 1:iterations){
@@ -341,16 +345,18 @@ test.means <- apply(test.out,2,mean)
 tstm.fac <- as.factor(ifelse(test.means < 0.5, 0, 1))
 
 
-CM.bootMidAtl <- confusionMatrix(trnm.fac, tstm.fac, positive = "1")
-boot.MidAtl.df <- as.data.frame(unlist(CM.bootMidAtl$overall))
-colnames(boot.MidAtl.df) <- "All Years"
-boot.MidAtl.df <- as.data.frame(t(boot.MidAtl.df))
-boot.MidAtl.df$Year <- "All Years"
-boot.MidAtl.df$Region <- "Mid Atl"
+CM.SNE <- confusionMatrix(trnm.fac, tstm.fac, positive = "1")
+boot.SNE.df <- as.data.frame(unlist(CM.SNE$overall))
+colnames(boot.SNE.df) <- "All Years"
+boot.SNE.df <- as.data.frame(t(boot.SNE.df))
+boot.SNE.df$Year <- "All Years"
+boot.SNE.df$Region <- "Southern NE"
 
 
-boot.Regions <- rbind(boot.SE.df, boot.SNE.df, boot.MidAtl.df, boot.GoM.df, boot.CCB.df, boot.Carolinas.df, 
+boot.Regions <- rbind(boot.SE.df, boot.SNE.df, boot.GoM.df, boot.CCB.df, boot.Carolinas.df, 
                       boot.AllYears.df)
+
+#Note, Mid-Atlantic did not have enough data for regional analysis
 
 
 
