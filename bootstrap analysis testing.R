@@ -437,71 +437,228 @@ boot.Years[1, 8] <- "Combined"
 
 filtered.df <- resurveys %>% filter(Stratum == "Nearshore SNE" | Stratum == "Midshore SNE") #Change for different regions
 
-boot.train.set <- createDataPartition(filtered.df$redetects, p = 2/3, list = FALSE)
+boot.train.set <- createFolds(filtered.df$redetects, k = 3)
 
-boot.train <- filtered.df[boot.train.set, ]
-boot.test <- filtered.df[-boot.train.set, ]
+#Manually iterate over each fold
+boot.train.set1 <- as.vector(boot.train.set[[1]])
+boot.train.set2 <- as.vector(boot.train.set[[2]])
+boot.train.set3 <- as.vector(boot.train.set[[3]])
+
+#Fold 1
+boot.train1 <- resurveys[boot.train.set1, ]
+boot.test1 <- resurveys[-boot.train.set1, ]
 
 #Match up spatiotemporal sampling units
-boot.train <- boot.train[boot.train$DetNum %in% boot.test$DetNum,]
-boot.test <- boot.test[boot.test$DetNum %in% boot.train$DetNum,]
+boot.train1 <- boot.train1[boot.train1$DetNum %in% boot.test1$DetNum,]
+boot.test1 <- boot.test1[boot.test1$DetNum %in% boot.train1$DetNum,]
 
 #Need to renumber the detnum for the for loop in the resampling approach to function
-detnum <- unique(boot.train$DetNum)
+detnum <- unique(boot.train1$DetNum)
 dumb <- data.frame(detnum = detnum,
                    numbers = 1:length(detnum))
 
-boot.train$detnum <- 0
+boot.train1$detnum <- 0
 for(i in dumb$detnum){
-  boot.train$detnum[boot.train$DetNum == i] <- match(i, dumb$detnum)
+  boot.train1$detnum[boot.train1$DetNum == i] <- match(i, dumb$detnum)
 }
 
-detnum2 <- unique(boot.test$DetNum)
+detnum2 <- unique(boot.test1$DetNum)
 dumb2 <- data.frame(detnum2 = detnum2,
                     numbers = 1:length(detnum2))
 
-boot.test$detnum <- 0
+boot.test1$detnum <- 0
 for(i in dumb2$detnum){
-  boot.test$detnum[boot.test$DetNum == i] <- match(i, dumb2$detnum)
+  boot.test1$detnum[boot.test1$DetNum == i] <- match(i, dumb2$detnum)
 }
 
-detnum <- boot.train$detnum
+detnum <- boot.train1$detnum
+
+
+#First, we evaluate the ability of the bootstrap resampling method that generates spatiotemporal persistence 
+#estimates from the training data to predict the spatiotemporal persistence estimates generated through the same 
+#bootstrap resampling approach using all years of data.
 
 #Run bootstrap resampling
 iterations <- 10000
-train.out <- matrix(NA, nrow = iterations, ncol=length(unique(boot.train$detnum)))
-for(s in unique(boot.train$detnum)){
+train.out1 <- matrix(NA, nrow = iterations, ncol=length(unique(boot.train1$detnum)))
+for(s in unique(boot.train1$detnum)){
   for(i in 1:iterations){
-    rows <- which(boot.train$detnum == s)
-    train.samp <- sample(boot.train$redetects[rows], size = length(rows), replace = TRUE)
-    train.out[i,s] <- mean(train.samp > 0) 
+    rows <- which(boot.train1$detnum == s)
+    train.samp <- sample(boot.train1$redetects[rows], size = length(rows), replace = TRUE)
+    train.out1[i,s] <- mean(train.samp > 0) 
   }
 }
 
-train.means <- apply(train.out,2,mean)
+train.means1 <- apply(train.out1, 2, mean)
 
-trnm.fac <- as.factor(ifelse(train.means < 0.5, 0, 1))
+trnm.fac1 <- as.factor(ifelse(train.means1 < 0.5, 0, 1))
 
-iterations <- 1000
-test.out <- matrix(NA, nrow = iterations, ncol=length(unique(boot.test$detnum)))
-for(s in unique(boot.test$detnum)){
+iterations <- 10000
+test.out1 <- matrix(NA, nrow = iterations, ncol=length(unique(boot.test1$detnum)))
+for(s in unique(boot.test1$detnum)){
   for(i in 1:iterations){
-    rows <- which(boot.test$detnum == s)
-    test.samp <- sample(boot.test$redetects[rows], size = length(rows), replace = TRUE)
-    test.out[i,s] <- mean(test.samp > 0) 
+    rows <- which(boot.test1$detnum == s)
+    test.samp <- sample(boot.test1$redetects[rows], size = length(rows), replace = TRUE)
+    test.out1[i,s] <- mean(test.samp > 0) 
   }
 }
 
-test.means <- apply(test.out,2,mean)
-tstm.fac <- as.factor(ifelse(test.means < 0.5, 0, 1))
+test.means1 <- apply(test.out1, 2, mean)
+tstm.fac1 <- as.factor(ifelse(test.means1 < 0.5, 0, 1))
+
+CM.boot1 <- confusionMatrix(trnm.fac1, tstm.fac1, positive = "1")
 
 
-CM.SNE <- confusionMatrix(trnm.fac, tstm.fac, positive = "1")
-boot.SNE.df <- as.data.frame(unlist(CM.SNE$overall))
-colnames(boot.SNE.df) <- "All Years"
-boot.SNE.df <- as.data.frame(t(boot.SNE.df))
-boot.SNE.df$Year <- "All Years"
-boot.SNE.df$Region <- "Southern NE"
+CM.SNE1 <- confusionMatrix(trnm.fac1, tstm.fac1, positive = "1")
+boot.SNE.df1 <- as.data.frame(unlist(CM.SNE1$overall))
+colnames(boot.SNE.df1) <- "All Years"
+boot.SNE.df1 <- as.data.frame(t(boot.SNE.df1))
+boot.SNE.df1$Year <- "All Years"
+boot.SNE.df1$Region <- "Southern NE"
+
+#Fold 2
+boot.train2 <- resurveys[boot.train.set2, ]
+boot.test2 <- resurveys[-boot.train.set2, ]
+
+#Match up spatiotemporal sampling units
+boot.train2 <- boot.train2[boot.train2$DetNum %in% boot.test2$DetNum,]
+boot.test2 <- boot.test2[boot.test2$DetNum %in% boot.train2$DetNum,]
+
+#Need to renumber the detnum for the for loop in the resampling approach to function
+detnum <- unique(boot.train2$DetNum)
+dumb <- data.frame(detnum = detnum,
+                   numbers = 1:length(detnum))
+
+boot.train2$detnum <- 0
+for(i in dumb$detnum){
+  boot.train2$detnum[boot.train2$DetNum == i] <- match(i, dumb$detnum)
+}
+
+detnum2 <- unique(boot.test2$DetNum)
+dumb2 <- data.frame(detnum2 = detnum2,
+                    numbers = 1:length(detnum2))
+
+boot.test2$detnum <- 0
+for(i in dumb2$detnum){
+  boot.test2$detnum[boot.test2$DetNum == i] <- match(i, dumb2$detnum)
+}
+
+detnum <- boot.train2$detnum
+
+
+#First, we evaluate the ability of the bootstrap resampling method that generates spatiotemporal persistence 
+#estimates from the training data to predict the spatiotemporal persistence estimates generated through the same 
+#bootstrap resampling approach using all years of data.
+
+#Run bootstrap resampling
+iterations <- 10000
+train.out2 <- matrix(NA, nrow = iterations, ncol=length(unique(boot.train2$detnum)))
+for(s in unique(boot.train2$detnum)){
+  for(i in 1:iterations){
+    rows <- which(boot.train2$detnum == s)
+    train.samp <- sample(boot.train2$redetects[rows], size = length(rows), replace = TRUE)
+    train.out2[i,s] <- mean(train.samp > 0) 
+  }
+}
+
+train.means2 <- apply(train.out2, 2, mean)
+
+trnm.fac2 <- as.factor(ifelse(train.means2 < 0.5, 0, 1))
+
+iterations <- 10000
+test.out2 <- matrix(NA, nrow = iterations, ncol=length(unique(boot.test2$detnum)))
+for(s in unique(boot.test2$detnum)){
+  for(i in 1:iterations){
+    rows <- which(boot.test2$detnum == s)
+    test.samp <- sample(boot.test2$redetects[rows], size = length(rows), replace = TRUE)
+    test.out2[i,s] <- mean(test.samp > 0) 
+  }
+}
+
+test.means2 <- apply(test.out2, 2, mean)
+tstm.fac2 <- as.factor(ifelse(test.means2 < 0.5, 0, 1))
+
+CM.boot2 <- confusionMatrix(trnm.fac2, tstm.fac2, positive = "1")
+
+
+CM.SNE2 <- confusionMatrix(trnm.fac2, tstm.fac2, positive = "1")
+boot.SNE.df2 <- as.data.frame(unlist(CM.SNE2$overall))
+colnames(boot.SNE.df2) <- "All Years"
+boot.SNE.df2 <- as.data.frame(t(boot.SNE.df2))
+boot.SNE.df2$Year <- "All Years"
+boot.SNE.df2$Region <- "Southern NE"
+
+#Fold 3
+boot.train3 <- resurveys[boot.train.set3, ]
+boot.test3 <- resurveys[-boot.train.set3, ]
+
+#Match up spatiotemporal sampling units
+boot.train3 <- boot.train3[boot.train3$DetNum %in% boot.test3$DetNum,]
+boot.test3 <- boot.test3[boot.test3$DetNum %in% boot.train3$DetNum,]
+
+#Need to renumber the detnum for the for loop in the resampling approach to function
+detnum <- unique(boot.train3$DetNum)
+dumb <- data.frame(detnum = detnum,
+                   numbers = 1:length(detnum))
+
+boot.train3$detnum <- 0
+for(i in dumb$detnum){
+  boot.train3$detnum[boot.train3$DetNum == i] <- match(i, dumb$detnum)
+}
+
+detnum2 <- unique(boot.test3$DetNum)
+dumb2 <- data.frame(detnum2 = detnum2,
+                    numbers = 1:length(detnum2))
+
+boot.test3$detnum <- 0
+for(i in dumb2$detnum){
+  boot.test3$detnum[boot.test3$DetNum == i] <- match(i, dumb2$detnum)
+}
+
+detnum <- boot.train3$detnum
+
+
+#First, we evaluate the ability of the bootstrap resampling method that generates spatiotemporal persistence 
+#estimates from the training data to predict the spatiotemporal persistence estimates generated through the same 
+#bootstrap resampling approach using all years of data.
+
+#Run bootstrap resampling
+iterations <- 10000
+train.out3 <- matrix(NA, nrow = iterations, ncol=length(unique(boot.train3$detnum)))
+for(s in unique(boot.train3$detnum)){
+  for(i in 1:iterations){
+    rows <- which(boot.train3$detnum == s)
+    train.samp <- sample(boot.train3$redetects[rows], size = length(rows), replace = TRUE)
+    train.out3[i,s] <- mean(train.samp > 0) 
+  }
+}
+
+train.means3 <- apply(train.out3, 2, mean)
+
+trnm.fac3 <- as.factor(ifelse(train.means3 < 0.5, 0, 1))
+
+iterations <- 10000
+test.out3 <- matrix(NA, nrow = iterations, ncol=length(unique(boot.test3$detnum)))
+for(s in unique(boot.test3$detnum)){
+  for(i in 1:iterations){
+    rows <- which(boot.test3$detnum == s)
+    test.samp <- sample(boot.test3$redetects[rows], size = length(rows), replace = TRUE)
+    test.out3[i,s] <- mean(test.samp > 0) 
+  }
+}
+
+test.means3 <- apply(test.out3, 2, mean)
+tstm.fac3 <- as.factor(ifelse(test.means3 < 0.5, 0, 1))
+
+CM.SNE3 <- confusionMatrix(trnm.fac3, tstm.fac3, positive = "1")
+
+
+CM.SNE3 <- confusionMatrix(trnm.fac3, tstm.fac3, positive = "1")
+boot.SNE.df3 <- as.data.frame(unlist(CM.SNE3$overall))
+colnames(boot.SNE.df3) <- "All Years"
+boot.SNE.df3 <- as.data.frame(t(boot.SNE.df3))
+boot.SNE.df3$Year <- "All Years"
+boot.SNE.df3$Region <- "Southern NE"
 
 
 boot.Regions <- rbind(boot.SE.df, boot.SNE.df, boot.GoM.df, boot.CCB.df, boot.Carolinas.df, 
